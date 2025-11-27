@@ -1,21 +1,29 @@
 import React from 'react';
 import { InventoryItem } from './types';
-import { Lock } from 'lucide-react';
+import { FaLock } from 'react-icons/fa';
 
 interface ShopItemProps {
 	item: InventoryItem;
 	gold: number;
-	onPointerDown: (e: React.PointerEvent, item: InventoryItem, source: 'shop') => void;
+	onPointerDown: (
+		e: React.PointerEvent,
+		item: InventoryItem,
+		source: 'shop'
+	) => void;
 }
 
-export const ShopItem: React.FC<ShopItemProps> = ({ item, gold, onPointerDown }) => {
+export const ShopItem: React.FC<ShopItemProps> = ({
+	item,
+	gold,
+	onPointerDown,
+}) => {
 	const w = item.shape[0].length;
 	return (
 		<div
-			className={`relative p-1 rounded border-2 ${
+			className={`relative p-1 rounded border ${
 				gold >= item.cost
-					? 'border-slate-600 bg-slate-800 hover:border-yellow-500 cursor-pointer'
-					: 'border-red-900 bg-slate-900 opacity-50'
+					? 'border-slate-700/50 bg-slate-800/30 hover:border-slate-600 hover:bg-slate-800/50 cursor-pointer'
+					: 'border-slate-800/50 bg-slate-900/30 opacity-50'
 			} transition-all`}
 			onPointerDown={(e) => gold >= item.cost && onPointerDown(e, item, 'shop')}
 		>
@@ -40,18 +48,17 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, gold, onPointerDown })
 					))
 				)}
 			</div>
-			<div className="mt-1 text-center text-[10px] font-bold text-yellow-500 flex justify-between">
+			<div className="mt-1 text-center text-[10px] font-medium text-slate-300 flex justify-between">
 				<span>{item.cost}$</span>
 				<span className="text-slate-400 max-w-[60px] truncate">
 					{item.name}
 				</span>
 			</div>
 			{item.isPinned && (
-				<div className="absolute -top-2 -right-2 bg-yellow-400 text-black rounded-full p-0.5 border border-white">
-					<Lock size={10} />
+				<div className="absolute -top-2 -right-2 bg-slate-700 text-slate-200 rounded-full p-0.5 border border-slate-600">
+					<FaLock size={10} />
 				</div>
 			)}
 		</div>
 	);
 };
-

@@ -46,8 +46,7 @@ export const DragPreview: React.FC<DragPreviewProps> = ({ dragState }) => {
 					))
 				)}
 			</div>
-			<div className="absolute -top-3 -right-3 w-5 h-5 rounded-full border-2 border-yellow-400 border-t-transparent animate-spin bg-black/50"></div>
+			<div className="absolute -top-3 -right-3 w-5 h-5 rounded-full border-2 border-slate-600 border-t-transparent animate-spin bg-slate-900/80"></div>
 		</div>
 	);
 };
-

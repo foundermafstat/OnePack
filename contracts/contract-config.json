@@ -1,0 +1,12 @@
+{
+	"network": "onechain-testnet",
+	"deployerAddress": "0x195809d7fa86b379fa8f9d0e7ca1edb78f0db32cac09c9d2a8d6667e00636d71",
+	"packageId": "0x1865f2d52964f2432815952e11f39eb03f4aee9b30c9b748beacabe7c38310cc",
+	"adminCapId": "0x2f3a11b6309f4865210509759cd75a0fcbdf15f6eec741821dfaa4f551f80627",
+	"treasuryCapId": "0x9718a10642edab5b19d109575801815dd30ebd794dc8adefdcfb8e5f0813ed39",
+	"onePackStateId": "0x470b1d9058071d20fe7bca8ea0eccbedc34447c76d00ef814b18e723fd351cb5",
+	"upgradeCapId": "0x03556757ef9ad9b229f92be650ce6d795e5d7599c5a4193b6f58e2f2027794b7",
+	"coinMetadataId": "0x59db45ae4c88b0099be4b55e8e8212fc6775e7f9257119357c21b99b1e8ca61f",
+	"transactionDigest": "J6K3yxC5ZYYFd9AG5zsJWDePGcZLdswXMFbrfi1DZCC2",
+	"deployedAt": "2024"
+}

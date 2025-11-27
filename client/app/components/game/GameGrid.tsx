@@ -1,7 +1,7 @@
 import React from 'react';
 import { InventoryItem, DragState, GhostGrid } from './types';
 import { ITEM_TYPES, GRID_W, GRID_H, CELL_SIZE } from './constants';
-import { RefreshCw, Lock } from 'lucide-react';
+import { FaSync, FaLock } from 'react-icons/fa';
 
 interface GameGridProps {
 	inventory: InventoryItem[];
@@ -29,11 +29,16 @@ export const GameGrid: React.FC<GameGridProps> = ({
 	onPointerDown,
 }) => {
 	const renderGridCell = (x: number, y: number) => {
-		let bgColor = isEnemy ? 'bg-red-950/30' : 'bg-slate-900/50';
-		let borderColor = 'border-slate-800';
+		let bgColor = isEnemy ? 'bg-red-950/5' : 'bg-slate-900/5';
+		let borderColor = '';
 
 		const bagItem = inventory.find((i) => {
-			if (!isEnemy && dragState && dragState.source === 'inventory' && i.uniqueId === dragState.item.uniqueId)
+			if (
+				!isEnemy &&
+				dragState &&
+				dragState.source === 'inventory' &&
+				i.uniqueId === dragState.item.uniqueId
+			)
 				return false;
 			if (i.type !== ITEM_TYPES.BAG) return false;
 			const h = i.currentShape.length;
@@ -45,7 +50,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
 
 		if (bagItem) {
 			bgColor = bagItem.color;
-			borderColor = isEnemy ? 'border-red-900/50' : 'border-amber-900/30';
+			borderColor = '';
 		}
 
 		if (!isEnemy && ghostGrid) {
@@ -60,13 +65,18 @@ export const GameGrid: React.FC<GameGridProps> = ({
 			) {
 				if (dragState!.currentShape[r][c] === 1) {
 					bgColor = valid ? 'bg-green-500/40' : 'bg-red-500/40';
-					borderColor = valid ? 'border-green-400' : 'border-red-400';
+					borderColor = '';
 				}
 			}
 		}
 
 		const item = inventory.find((i) => {
-			if (!isEnemy && dragState && dragState.source === 'inventory' && i.uniqueId === dragState.item.uniqueId)
+			if (
+				!isEnemy &&
+				dragState &&
+				dragState.source === 'inventory' &&
+				i.uniqueId === dragState.item.uniqueId
+			)
 				return false;
 			if (i.type === ITEM_TYPES.BAG) return false;
 			const h = i.currentShape.length;
@@ -79,7 +89,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
 		let content: React.ReactNode = null;
 		if (item) {
 			bgColor = item.color;
-			borderColor = 'border-slate-900/20';
+			borderColor = '';
 
 			let itemR = y - item.y;
 			let itemC = x - item.x;
@@ -101,7 +111,10 @@ export const GameGrid: React.FC<GameGridProps> = ({
 				>
 					{isAnchor ? item.icon : ''}
 					{isAnchor && item.isPinned && (
-						<Lock size={12} className="absolute top-1 right-1 text-slate-700" />
+						<FaLock
+							size={12}
+							className="absolute top-1 right-1 text-slate-700"
+						/>
 					)}
 					{isAnchor && item.isMergeLocked && !isEnemy && (
 						<div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 border border-white"></div>
@@ -109,7 +122,11 @@ export const GameGrid: React.FC<GameGridProps> = ({
 				</div>
 			);
 
-			if (gameState === 'battle' && item.cooldownCurrent !== undefined && item.cooldown) {
+			if (
+				gameState === 'battle' &&
+				item.cooldownCurrent !== undefined &&
+				item.cooldown
+			) {
 				const percent = 1 - item.cooldownCurrent / item.cooldown;
 				if (!isNaN(percent)) {
 					content = (
@@ -135,16 +152,20 @@ export const GameGrid: React.FC<GameGridProps> = ({
 				content = (
 					<div
 						className="absolute z-0 flex items-center justify-center text-amber-900/50 cursor-grab hover:text-amber-100 w-full h-full"
-						onPointerDown={(e) => onPointerDown(e, bagItem, 'inventory', bagC, bagR)}
+						onPointerDown={(e) =>
+							onPointerDown(e, bagItem, 'inventory', bagC, bagR)
+						}
 					>
-						<RefreshCw size={14} className="pointer-events-auto" />
+						<FaSync size={14} className="pointer-events-auto" />
 					</div>
 				);
 			} else {
 				content = (
 					<div
 						className="absolute inset-0 z-0 cursor-grab"
-						onPointerDown={(e) => onPointerDown(e, bagItem, 'inventory', bagC, bagR)}
+						onPointerDown={(e) =>
+							onPointerDown(e, bagItem, 'inventory', bagC, bagR)
+						}
 					></div>
 				);
 			}
@@ -153,7 +174,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
 		return (
 			<div
 				key={`${x}-${y}`}
-				className={`relative border ${borderColor} ${bgColor}`}
+				className={`relative ${borderColor} ${bgColor}`}
 				style={{ width: CELL_SIZE, height: CELL_SIZE }}
 			>
 				{content}
@@ -161,18 +182,29 @@ export const GameGrid: React.FC<GameGridProps> = ({
 		);
 	};
 
+	const backgroundImage = isEnemy
+		? '/ui/enemy-board.jpg'
+		: '/ui/player-board.jpg';
+
 	return (
 		<div
-			ref={backpackRef}
-			className="grid bg-slate-950 border-2 border-slate-800 relative shadow-inner"
+			className="relative p-11 bg-cover bg-center bg-no-repeat"
 			style={{
-				gridTemplateColumns: `repeat(${GRID_W}, ${CELL_SIZE}px)`,
+				backgroundImage: `url(${backgroundImage})`,
+				backgroundSize: 'cover',
 			}}
 		>
-			{Array.from({ length: GRID_H }).map((_, y) =>
-				Array.from({ length: GRID_W }).map((_, x) => renderGridCell(x, y))
-			)}
+			<div
+				ref={backpackRef}
+				className="grid relative"
+				style={{
+					gridTemplateColumns: `repeat(${GRID_W}, ${CELL_SIZE}px)`,
+				}}
+			>
+				{Array.from({ length: GRID_H }).map((_, y) =>
+					Array.from({ length: GRID_W }).map((_, x) => renderGridCell(x, y))
+				)}
+			</div>
 		</div>
 	);
 };
-

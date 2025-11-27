@@ -1,12 +1,13 @@
 import React from 'react';
-import { GameState, PlayerStats } from './types';
-import { Play, Sparkles, Coins, Heart, Shield } from 'lucide-react';
+import { GameState, PlayerStats, EnemyStats } from './types';
+import { FaPlay, FaMagic, FaCoins, FaHeart, FaShieldAlt } from 'react-icons/fa';
 
 interface GameHeaderProps {
 	gameState: GameState;
 	battleSpeed: number;
 	gold: number;
 	playerStats: PlayerStats;
+	enemyStats?: EnemyStats;
 	onStartBattle: () => void;
 	onSetBattleSpeed: (speed: number) => void;
 	onContinue: () => void;
@@ -17,73 +18,114 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 	battleSpeed,
 	gold,
 	playerStats,
+	enemyStats,
 	onStartBattle,
 	onSetBattleSpeed,
 	onContinue,
 }) => {
 	return (
-		<div className="z-10 w-full max-w-6xl flex justify-between items-center mb-2 bg-slate-900 p-2 rounded-xl border border-slate-800 shadow-lg pointer-events-auto">
-			<h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent flex items-center gap-2">
-				BattlePack{' '}
-				<span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
-					BETA
-				</span>
-			</h1>
+		<div className="z-10 w-full flex flex-col gap-2 pointer-events-auto bg-[#020305]">
+			<div className="flex justify-between items-center bg-slate-900/50 p-3 border-b border-slate-800/50">
+				<h1 className="text-xl font-bold text-slate-300 flex items-center gap-2">
+					BattlePack{' '}
+					<span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded">
+						BETA
+					</span>
+				</h1>
 
-			{gameState === 'shop' && (
-				<button
-					onClick={onStartBattle}
-					className="px-6 py-1 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded shadow-lg flex items-center justify-center gap-2 hover:scale-[1.05] transition-transform"
-				>
-					<Play size={16} fill="white" /> TO BATTLE
-				</button>
-			)}
-			{gameState === 'battle' && (
-				<div className="flex bg-slate-800 rounded p-1 gap-1">
-					{[1, 2, 4, 8].map((s) => (
-						<button
-							key={s}
-							onClick={() => onSetBattleSpeed(s)}
-							className={`px-2 py-0.5 text-xs font-bold rounded ${
-								battleSpeed === s
-									? 'bg-yellow-500 text-black'
-									: 'text-slate-400 hover:bg-slate-700'
-							}`}
-						>
-							x{s}
-						</button>
-					))}
-				</div>
-			)}
-			{(gameState === 'victory' || gameState === 'gameover') && (
-				<button
-					onClick={onContinue}
-					className="px-4 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded shadow-lg flex items-center justify-center gap-2"
-				>
-					{gameState === 'victory' ? (
-						<>
-							<Sparkles size={16} /> CONTINUE
-						</>
-					) : (
-						'RESTART'
-					)}
-				</button>
-			)}
-			<div className="flex gap-3 text-sm font-medium">
-				<div className="text-yellow-400 flex items-center">
-					<Coins size={16} className="mr-1" />
-					{gold}
-				</div>
-				<div className="text-red-400 flex items-center">
-					<Heart size={16} className="mr-1" />
-					{Math.ceil(playerStats.hp)}
-				</div>
-				<div className="text-blue-400 flex items-center">
-					<Shield size={16} className="mr-1" />
-					{Math.min(90, Math.floor(playerStats.armor))}%
+				{gameState === 'shop' && (
+					<button
+						onClick={onStartBattle}
+						className="px-6 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 flex items-center justify-center gap-2 transition-colors"
+					>
+						<FaPlay size={14} /> TO BATTLE
+					</button>
+				)}
+				{gameState === 'battle' && (
+					<div className="flex bg-slate-800/50 rounded border border-slate-700/50 p-1 gap-1">
+						{[1, 2, 4, 8].map((s) => (
+							<button
+								key={s}
+								onClick={() => onSetBattleSpeed(s)}
+								className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+									battleSpeed === s
+										? 'bg-slate-700 text-slate-200'
+										: 'text-slate-500 hover:bg-slate-800/50 hover:text-slate-300'
+								}`}
+							>
+								x{s}
+							</button>
+						))}
+					</div>
+				)}
+				{(gameState === 'victory' || gameState === 'gameover') && (
+					<button
+						onClick={onContinue}
+						className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 flex items-center justify-center gap-2 transition-colors"
+					>
+						{gameState === 'victory' ? (
+							<>
+								<FaMagic size={14} /> CONTINUE
+							</>
+						) : (
+							'RESTART'
+						)}
+					</button>
+				)}
+				<div className="flex gap-3 text-sm font-medium">
+					<div className="text-slate-400 flex items-center">
+						<FaCoins size={14} className="mr-1" />
+						{gold}
+					</div>
 				</div>
 			</div>
+
+			{(gameState === 'battle' ||
+				gameState === 'victory' ||
+				gameState === 'gameover') && (
+				<div className="flex justify-between items-center gap-4 bg-slate-900/30 p-3 border-b border-slate-800/50">
+					<div className="flex flex-col gap-1">
+						<div className="text-xs text-slate-500 uppercase tracking-wider">
+							PLAYER
+						</div>
+						<div className="flex gap-4 text-sm font-medium">
+							<div className="text-slate-300 flex items-center">
+								<FaHeart size={12} className="mr-1" />
+								HP: {Math.ceil(playerStats.hp)}/{playerStats.maxHp}
+							</div>
+							<div className="text-slate-300 flex items-center">
+								<FaShieldAlt size={12} className="mr-1" />
+								Armor: {Math.min(90, Math.floor(playerStats.armor))}%
+							</div>
+							{playerStats.stamina !== undefined && (
+								<div className="text-slate-300 flex items-center">
+									<span className="mr-1">⚡</span>
+									Stamina: {playerStats.stamina}/{playerStats.maxStamina}
+								</div>
+							)}
+						</div>
+					</div>
+					{enemyStats && (
+						<div className="flex flex-col gap-1 items-end">
+							<div className="text-xs text-slate-500 uppercase tracking-wider">
+								ENEMY
+							</div>
+							<div className="flex gap-4 text-sm font-medium">
+								<div className="text-slate-300 flex items-center">
+									<FaHeart size={12} className="mr-1" />
+									HP: {Math.ceil(enemyStats.hp)}/{enemyStats.maxHp}
+								</div>
+								{enemyStats.armor !== undefined && (
+									<div className="text-slate-300 flex items-center">
+										<FaShieldAlt size={12} className="mr-1" />
+										Armor: {Math.min(90, Math.floor(enemyStats.armor))}%
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };
-

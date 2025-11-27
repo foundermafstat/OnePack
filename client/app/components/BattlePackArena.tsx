@@ -130,6 +130,10 @@ export default function BattlePackArena() {
 	};
 
 	useEffect(() => {
+		// Disable scrolling on body and html
+		document.body.style.overflow = 'hidden';
+		document.documentElement.style.overflow = 'hidden';
+
 		const starterBag = ITEMS_DB.find((i) => i.id === 'starter_bag');
 		if (starterBag) {
 			setInventory([
@@ -145,6 +149,12 @@ export default function BattlePackArena() {
 			]);
 		}
 		rerollShop();
+
+		return () => {
+			// Re-enable scrolling when component unmounts
+			document.body.style.overflow = 'unset';
+			document.documentElement.style.overflow = 'unset';
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -299,7 +309,8 @@ export default function BattlePackArena() {
 
 	return (
 		<div
-			className="min-h-screen bg-slate-950 text-slate-100 font-sans p-2 flex flex-col items-center select-none overflow-hidden touch-none"
+			className="h-screen w-screen text-slate-100 font-sans flex flex-col items-center select-none overflow-hidden touch-none"
+			style={{ backgroundColor: '#020305' }}
 			onPointerDown={(e) => {
 				if (e.target === e.currentTarget) {
 					setSelectedItem(null);
@@ -317,17 +328,20 @@ export default function BattlePackArena() {
 				))}
 			</div>
 
-			<GameHeader
-				gameState={gameState}
-				battleSpeed={battleSpeed}
-				gold={gold}
-				playerStats={playerStats}
-				onStartBattle={startBattle}
-				onSetBattleSpeed={setBattleSpeed}
-				onContinue={handleContinue}
-			/>
+			<div className="w-full">
+				<GameHeader
+					gameState={gameState}
+					battleSpeed={battleSpeed}
+					gold={gold}
+					playerStats={playerStats}
+					enemyStats={enemyStats}
+					onStartBattle={startBattle}
+					onSetBattleSpeed={setBattleSpeed}
+					onContinue={handleContinue}
+				/>
+			</div>
 
-			<div className="z-10 flex flex-col items-center w-full max-w-7xl pointer-events-none">
+			<div className="z-10 flex flex-col items-center w-full max-w-7xl pointer-events-none p-2 flex-1 overflow-hidden min-h-0">
 				{gameState === 'shop' && (
 					<Shop
 						shopItems={shopItems}
@@ -338,12 +352,9 @@ export default function BattlePackArena() {
 					/>
 				)}
 
-				<div className="flex flex-col lg:flex-row gap-4 w-full justify-center items-start">
+				<div className="flex flex-col lg:flex-row gap-4 w-full justify-center items-stretch flex-1 min-h-0">
 					<div className="flex flex-col gap-2 pointer-events-auto">
-						<div className="bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-2xl relative">
-							<div className="text-center text-slate-500 text-[10px] mb-1 uppercase tracking-widest">
-								YOUR BACKPACK
-							</div>
+						<div className="relative">
 							<GameGrid
 								inventory={inventory}
 								dragState={dragState}
@@ -378,17 +389,13 @@ export default function BattlePackArena() {
 						</div>
 					</div>
 
-					<div className="flex flex-col gap-2 w-full lg:w-64 h-[400px] pointer-events-auto">
+					<div className="flex flex-col gap-2 w-full lg:w-64 pointer-events-auto min-h-0">
 						<BattleLogComponent logs={battleLog} gameState={gameState} />
 					</div>
 
 					{gameState !== 'shop' && (
 						<div className="flex flex-col gap-2 animate-in fade-in slide-in-from-right duration-500 pointer-events-auto">
-							<div className="bg-red-950/30 p-3 rounded-xl border border-red-900/50 shadow-2xl relative">
-								<div className="flex justify-between text-xs text-red-400 mb-1 px-1">
-									<span>ENEMY</span>
-									<span>HP: {enemyStats.hp}</span>
-								</div>
+							<div className="relative">
 								<GameGrid
 									inventory={enemyInventory}
 									dragState={null}

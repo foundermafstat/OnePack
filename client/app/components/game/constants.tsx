@@ -1,15 +1,23 @@
 import React from 'react';
-import {
-	Sword,
-	Shield,
-	Heart,
-	Zap,
-	Backpack,
-} from 'lucide-react';
+import { FaShieldAlt, FaHeart, FaBolt, FaShoppingBag } from 'react-icons/fa';
 import { Item, ItemType } from './types';
 
+// Simple sword icon component
+const SwordIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="currentColor"
+		className={className}
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path d="M6.92 5H5L14 14L15 13.06L19.06 17.11L17.11 19.06L13.06 15L12 14L4 22H2V20L10 12L9 11L4.89 6.89L6.92 5ZM20.71 4.04L21.96 2.79C22.15 2.6 22.15 2.29 21.96 2.1L19.9 0.04C19.71 -0.15 19.4 -0.15 19.21 0.04L18 1.25L20.71 4.04ZM17.96 5.29L15.12 8.12L8.29 1.29L11.12 -1.54L11.96 -0.71L19.79 7.12L20.63 6.29L17.96 5.29Z" />
+	</svg>
+);
+
 export const GRID_W = 10;
-export const GRID_H = 7;
+export const GRID_H = 10;
 export const CELL_SIZE = 40;
 
 export const ITEM_TYPES = {
@@ -42,7 +50,7 @@ export const ITEMS_DB: Item[] = [
 		rarity: 'common',
 		cost: 4,
 		description: 'Basic 3x3 bag.',
-		icon: <Backpack size={20} className="opacity-50" />,
+		icon: <FaShoppingBag size={20} className="opacity-50" />,
 		color: 'bg-amber-700/40',
 	},
 	{
@@ -83,7 +91,7 @@ export const ITEMS_DB: Item[] = [
 		rarity: 'rare',
 		cost: 6,
 		description: 'Deep backpack.',
-		icon: <Backpack size={20} className="opacity-80 text-stone-800" />,
+		icon: <FaShoppingBag size={20} className="opacity-80 text-stone-800" />,
 		color: 'bg-stone-700/40',
 	},
 	// --- WEAPONS ---
@@ -98,7 +106,7 @@ export const ITEMS_DB: Item[] = [
 		damage: 4,
 		staminaCost: 1,
 		description: '4 damage.',
-		icon: <Sword size={24} />,
+		icon: <SwordIcon size={24} />,
 		color: 'bg-stone-400',
 	},
 	{
@@ -112,7 +120,7 @@ export const ITEMS_DB: Item[] = [
 		damage: 7,
 		staminaCost: 1.2,
 		description: '7 damage. Fast.',
-		icon: <Sword size={24} className="text-sky-300 drop-shadow-md" />,
+		icon: <SwordIcon size={24} className="text-sky-300 drop-shadow-md" />,
 		color: 'bg-sky-700',
 	},
 	{
@@ -126,7 +134,7 @@ export const ITEMS_DB: Item[] = [
 		damage: 3,
 		staminaCost: 0.5,
 		description: '3 damage.',
-		icon: <Sword size={20} className="rotate-45" />,
+		icon: <SwordIcon size={20} className="rotate-45" />,
 		color: 'bg-slate-300',
 	},
 	{
@@ -140,7 +148,7 @@ export const ITEMS_DB: Item[] = [
 		damage: 5,
 		staminaCost: 0.5,
 		description: '5 damage. Very fast.',
-		icon: <Sword size={20} className="rotate-45 text-purple-400" />,
+		icon: <SwordIcon size={20} className="rotate-45 text-purple-400" />,
 		color: 'bg-purple-900',
 	},
 	// --- ARMOR ---
@@ -157,7 +165,7 @@ export const ITEMS_DB: Item[] = [
 		cooldown: 4.0,
 		block: 20,
 		description: 'Blocks 20% damage.',
-		icon: <Shield size={24} />,
+		icon: <FaShieldAlt size={24} />,
 		color: 'bg-blue-400',
 	},
 	{
@@ -173,7 +181,7 @@ export const ITEMS_DB: Item[] = [
 		cooldown: 4.0,
 		block: 40,
 		description: 'Blocks 40% damage.',
-		icon: <Shield size={24} className="text-yellow-200" />,
+		icon: <FaShieldAlt size={24} className="text-yellow-200" />,
 		color: 'bg-yellow-600',
 	},
 	// --- CONSUMABLES ---
@@ -188,7 +196,7 @@ export const ITEMS_DB: Item[] = [
 		heal: 10,
 		isConsumable: true,
 		description: 'Heals 10.',
-		icon: <Heart size={24} />,
+		icon: <FaHeart size={24} />,
 		color: 'bg-red-400',
 	},
 	{
@@ -202,7 +210,7 @@ export const ITEMS_DB: Item[] = [
 		heal: 25,
 		isConsumable: true,
 		description: 'Heals 25.',
-		icon: <Heart size={28} className="text-white drop-shadow" />,
+		icon: <FaHeart size={28} className="text-white drop-shadow" />,
 		color: 'bg-red-600',
 	},
 	{
@@ -231,7 +239,7 @@ export const ITEMS_DB: Item[] = [
 		effectType: 'buff_damage',
 		value: 1,
 		description: '+1 damage.',
-		icon: <Zap size={20} />,
+		icon: <FaBolt size={20} />,
 		color: 'bg-pink-500',
 	},
 	{
@@ -245,7 +253,7 @@ export const ITEMS_DB: Item[] = [
 		effectType: 'buff_damage',
 		value: 2,
 		description: '+2 damage. Faster.',
-		icon: <Zap size={20} className="text-cyan-200" />,
+		icon: <FaBolt size={20} className="text-cyan-200" />,
 		color: 'bg-cyan-500',
 	},
 ];

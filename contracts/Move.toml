@@ -1,18 +1,13 @@
 [package]
 name = "onepack"
 version = "1.0.0"
+edition = "2024.beta"
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
-MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "external-crates/move/crates/move-stdlib", rev = "framework/mainnet" }
+One = { local = "../onechain/crates/sui-framework/packages/one-framework" }
+MoveStdlib = { local = "../onechain/crates/sui-framework/packages/move-stdlib" }
 
 [addresses]
 onepack = "0x0"
-
-[dev-dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
-MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "external-crates/move/crates/move-stdlib", rev = "framework/mainnet" }
-
-[dev-addresses]
-sui = "0x2"
-
+one = "0x2"
+std = "0x1"

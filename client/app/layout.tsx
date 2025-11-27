@@ -1,19 +1,9 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import '@mysten/dapp-kit/dist/index.css';
 import { Providers } from './providers';
 import Header from './components/Header';
-
-const geistSans = Geist({
-	variable: '--font-geist-sans',
-	subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
-	subsets: ['latin'],
-});
+import { fontBebas, fontMontserrat } from '@/assets/fonts';
 
 export const metadata: Metadata = {
 	title: 'OnePack - Sui dApp',
@@ -28,7 +18,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${fontBebas.variable} ${fontMontserrat.variable} antialiased`}
 			>
 				<Providers>
 					<Header />
