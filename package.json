@@ -1,7 +1,9 @@
 {
-  "dependencies": {
-    "@onelabs/dapp-kit": "^0.15.5",
-    "@onelabs/sui": "^1.26.2",
-    "@tanstack/react-query": "^5.90.11"
-  }
+  "name": "onepack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OnePack - Sui dApp with BattlePackArena game",
+  "workspaces": [
+    "client"
+  ]
 }
