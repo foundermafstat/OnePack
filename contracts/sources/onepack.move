@@ -1,5 +1,5 @@
 /// OnePack Move Smart Contract
-/// Единый контракт для игры OnePack включающий токеномику, маркетплейс, статистику и управление предметами
+/// Unified contract for OnePack game including tokenomics, marketplace, statistics and item management
 
 module onepack::onepack {
     use one::object::{Self, ID, UID};
@@ -12,53 +12,53 @@ module onepack::onepack {
     use one::oct::OCT;
     use std::option;
 
-    // ========== Константы ==========
+    // ========== Constants ==========
     
-    /// Комиссия маркетплейса: 2.5% = 250 базисных пунктов
+    /// Marketplace fee: 2.5% = 250 basis points
     const MARKETPLACE_FEE_BPS: u64 = 250;
-    /// Минимальная ликвидность для пула
+    /// Minimum liquidity for pool
     const MIN_LIQUIDITY: u64 = 1000;
-    /// Ошибка: не авторизован
+    /// Error: not authorized
     const ENotAuthorized: u64 = 0;
-    /// Ошибка: недостаточно средств
+    /// Error: insufficient funds
     const EInsufficientFunds: u64 = 1;
-    /// Ошибка: предмет не найден
+    /// Error: item not found
     const EItemNotFound: u64 = 2;
-    /// Ошибка: предмет уже в продаже
+    /// Error: item already listed
     const EItemAlreadyListed: u64 = 3;
-    /// Ошибка: предмет не в продаже
+    /// Error: item not listed
     const EItemNotListed: u64 = 4;
-    /// Ошибка: недостаточная ликвидность
+    /// Error: insufficient liquidity
     const EInsufficientLiquidity: u64 = 5;
-    /// Ошибка: пул не инициализирован
+    /// Error: pool not initialized
     const EPoolNotInitialized: u64 = 6;
-    /// Ошибка: неверная цена
+    /// Error: invalid price
     const EInvalidPrice: u64 = 7;
-    /// Ошибка: статистика уже существует
+    /// Error: stats already exists
     const EStatsAlreadyExists: u64 = 8;
 
-    // ========== Типы токенов ==========
+    // ========== Token Types ==========
     
-    /// One-Time Witness для токена ONEPACK
+    /// One-Time Witness for ONEPACK token
     public struct ONEPACK has drop {}
 
-    // ========== Структуры ==========
+    // ========== Structures ==========
 
-    /// Администратор контракта (хранит адрес админа)
+    /// Contract administrator (stores admin address)
     public struct AdminCap has key, store {
         id: UID,
         admin: address,
     }
 
-    /// Пул ликвидности для свапа SUI <-> ONEPACK (Constant Product AMM)
+    /// Liquidity pool for SUI <-> ONEPACK swap (Constant Product AMM)
     public struct SwapPool has key, store {
         id: UID,
         sui_balance: Balance<OCT>,
         onepack_balance: Balance<ONEPACK>,
-        k: u128, // Константа k = x * y
+        k: u128, // Constant k = x * y
     }
 
-    /// SBT токен для статистики игрока
+    /// SBT token for player statistics
     public struct PlayerStats has key, store {
         id: UID,
         player: address,
@@ -68,11 +68,11 @@ module onepack::onepack {
         play_time_seconds: u64,
         level: u64,
         rating: u64,
-        game_result_ipfs: vector<u8>, // IPFS URL для результатов игр
-        backpack_ipfs: vector<u8>, // IPFS URL для состояния рюкзака
+        game_result_ipfs: vector<u8>, // IPFS URL for game results
+        backpack_ipfs: vector<u8>, // IPFS URL for backpack state
     }
 
-    /// Игровой предмет (NFT)
+    /// Game item (NFT)
     public struct GameItem has key, store {
         id: UID,
         item_id: u64,
@@ -81,34 +81,34 @@ module onepack::onepack {
         name: vector<u8>,
         description: vector<u8>,
         image_url: vector<u8>,
-        ipfs_metadata_url: vector<u8>, // IPFS URL для дополнительных метаданных
+        ipfs_metadata_url: vector<u8>, // IPFS URL for additional metadata
         owner: address,
-        is_listed: bool, // Флаг продажи на маркетплейсе
+        is_listed: bool, // Marketplace listing flag
     }
 
-    /// Листинг на маркетплейсе
+    /// Marketplace listing
     public struct MarketplaceListing has key, store {
         id: UID,
         item_id: ID,
-        price: u64, // Цена в ONEPACK токенах
+        price: u64, // Price in ONEPACK tokens
         seller: address,
         created_at: u64,
     }
 
-    /// Глобальное хранилище контракта
+    /// Global contract storage
     public struct OnePackState has key, store {
         id: UID,
         admin_cap: ID,
         treasury_cap: ID,
         swap_pool: option::Option<ID>,
-        items: Table<ID, GameItem>, // Хранилище всех предметов
-        listings: Table<ID, MarketplaceListing>, // Активные листинги
-        player_stats: Table<address, ID>, // Маппинг адреса игрока на ID его статистики
+        items: Table<ID, GameItem>, // Storage for all items
+        listings: Table<ID, MarketplaceListing>, // Active listings
+        player_stats: Table<address, ID>, // Mapping of player address to their stats ID
     }
 
-    // ========== События ==========
+    // ========== Events ==========
 
-    /// Событие создания предмета
+    /// Item minted event
     public struct ItemMinted has copy, drop {
         item_id: ID,
         item_type: u8,
@@ -116,14 +116,14 @@ module onepack::onepack {
         owner: address,
     }
 
-    /// Событие выставления предмета на продажу
+    /// Item listed event
     public struct ItemListed has copy, drop {
         item_id: ID,
         price: u64,
         seller: address,
     }
 
-    /// Событие продажи предмета
+    /// Item sold event
     public struct ItemSold has copy, drop {
         item_id: ID,
         price: u64,
@@ -132,18 +132,18 @@ module onepack::onepack {
         fee: u64,
     }
 
-    /// Событие сжигания предмета
+    /// Item burned event
     public struct ItemBurned has copy, drop {
         item_id: ID,
     }
 
-    /// Событие минтинга токенов
+    /// Token minted event
     public struct TokenMinted has copy, drop {
         recipient: address,
         amount: u64,
     }
 
-    /// Событие свапа
+    /// Swap executed event
     public struct SwapExecuted has copy, drop {
         from_token: vector<u8>,
         to_token: vector<u8>,
@@ -152,7 +152,7 @@ module onepack::onepack {
         user: address,
     }
 
-    /// Событие обновления статистики
+    /// Stats updated event
     public struct StatsUpdated has copy, drop {
         player: address,
         wins: u64,
@@ -161,17 +161,17 @@ module onepack::onepack {
         rating: u64,
     }
 
-    /// Событие записи результата игры
+    /// Game result recorded event
     public struct GameResultRecorded has copy, drop {
         player: address,
         ipfs_url: vector<u8>,
     }
 
-    // ========== Инициализация ==========
+    // ========== Initialization ==========
 
-    /// Инициализация модуля
+    /// Module initialization
     fun init(witness: ONEPACK, ctx: &mut TxContext) {
-        // Создание токена ONEPACK
+        // Create ONEPACK token
         let (treasury_cap, metadata) = coin::create_currency<ONEPACK>(
             witness,
             9, // decimals
@@ -182,13 +182,13 @@ module onepack::onepack {
             ctx,
         );
 
-        // Создание AdminCap с адресом деплоя
+        // Create AdminCap with deployer address
         let admin_cap = AdminCap {
             id: object::new(ctx),
             admin: ctx.sender(),
         };
 
-        // Создание глобального состояния
+        // Create global state
         let state = OnePackState {
             id: object::new(ctx),
             admin_cap: object::id(&admin_cap),
@@ -199,24 +199,24 @@ module onepack::onepack {
             player_stats: table::new(ctx),
         };
 
-        // Замораживаем метаданные токена
+        // Freeze token metadata
         transfer::public_freeze_object(metadata);
         
-        // Передаем AdminCap и TreasuryCap администратору
+        // Transfer AdminCap and TreasuryCap to administrator
         transfer::public_transfer(admin_cap, ctx.sender());
         transfer::public_transfer(treasury_cap, ctx.sender());
         
-        // Делаем состояние общим (shared)
+        // Make state shared
         transfer::public_share_object(state);
     }
 
-    // ========== Вспомогательные функции ==========
+    // ========== Helper Functions ==========
 
-    // Вспомогательные функции удалены - проверка прав выполняется напрямую в функциях
+    // Helper functions removed - permission checks are performed directly in functions
 
-    // ========== Функции токена ==========
+    // ========== Token Functions ==========
 
-    /// Минтинг ONEPACK токенов (только админ)
+    /// Mint ONEPACK tokens (admin only)
     public entry fun admin_mint_tokens(
         _state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -236,9 +236,9 @@ module onepack::onepack {
         });
     }
 
-    // ========== Функции свап пула ==========
+    // ========== Swap Pool Functions ==========
 
-    /// Инициализация свап пула (только админ)
+    /// Initialize swap pool (admin only)
     public entry fun init_swap_pool(
         state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -269,7 +269,7 @@ module onepack::onepack {
         transfer::public_share_object(pool);
     }
 
-    /// Свап SUI на ONEPACK
+    /// Swap SUI to ONEPACK
     public entry fun swap_sui_to_onepack(
         pool: &mut SwapPool,
         sui_coin: Coin<OCT>,
@@ -292,7 +292,7 @@ module onepack::onepack {
         assert!(onepack_out >= min_onepack_out, EInsufficientFunds);
         assert!(onepack_out < onepack_balance, EInsufficientLiquidity);
 
-        // Обновляем балансы
+        // Update balances
         let sui_balance_in = coin::into_balance(sui_coin);
         balance::join(&mut pool.sui_balance, sui_balance_in);
         
@@ -309,7 +309,7 @@ module onepack::onepack {
         });
     }
 
-    /// Свап ONEPACK на SUI
+    /// Swap ONEPACK to SUI
     public entry fun swap_onepack_to_sui(
         pool: &mut SwapPool,
         onepack_coin: Coin<ONEPACK>,
@@ -331,7 +331,7 @@ module onepack::onepack {
         assert!(sui_out >= min_sui_out, EInsufficientFunds);
         assert!(sui_out < sui_balance, EInsufficientLiquidity);
 
-        // Обновляем балансы
+        // Update balances
         let onepack_balance_in = coin::into_balance(onepack_coin);
         balance::join(&mut pool.onepack_balance, onepack_balance_in);
         
@@ -348,7 +348,7 @@ module onepack::onepack {
         });
     }
 
-    /// Добавление ликвидности (только админ)
+    /// Add liquidity (admin only)
     public entry fun add_liquidity(
         pool: &mut SwapPool,
         admin_cap: &AdminCap,
@@ -365,15 +365,15 @@ module onepack::onepack {
         balance::join(&mut pool.sui_balance, sui_balance_in);
         balance::join(&mut pool.onepack_balance, onepack_balance_in);
         
-        // Обновляем k
+        // Update k
         let sui_balance = balance::value(&pool.sui_balance);
         let onepack_balance = balance::value(&pool.onepack_balance);
         pool.k = (sui_balance as u128) * (onepack_balance as u128);
     }
 
-    // ========== Функции статистики игрока (SBT) ==========
+    // ========== Player Statistics Functions (SBT) ==========
 
-    /// Создание статистики игрока (SBT)
+    /// Create player statistics (SBT)
     public entry fun create_player_stats(
         state: &mut OnePackState,
         ctx: &mut TxContext,
@@ -399,7 +399,7 @@ module onepack::onepack {
         transfer::public_transfer(stats, player);
     }
 
-    /// Обновление статистики игрока (внутренняя функция, вызывается контрактом)
+    /// Update player statistics (internal function, called by contract)
     public fun update_stats(
         stats: &mut PlayerStats,
         wins_delta: u64,
@@ -412,7 +412,7 @@ module onepack::onepack {
         stats.total_damage = stats.total_damage + damage_delta;
         stats.play_time_seconds = stats.play_time_seconds + time_delta;
         
-        // Обновление уровня и рейтинга (простая формула)
+        // Update level and rating (simple formula)
         let total_games = stats.wins + stats.losses;
         if (total_games > 0) {
             stats.level = 1 + (total_games / 10);
@@ -429,7 +429,7 @@ module onepack::onepack {
         });
     }
 
-    /// Обновление IPFS URL для результатов игры
+    /// Update IPFS URL for game results
     public entry fun update_game_result_ipfs(
         stats: &mut PlayerStats,
         ipfs_url: vector<u8>,
@@ -444,7 +444,7 @@ module onepack::onepack {
         });
     }
 
-    /// Обновление IPFS URL для состояния рюкзака
+    /// Update IPFS URL for backpack state
     public entry fun update_backpack_ipfs(
         stats: &mut PlayerStats,
         ipfs_url: vector<u8>,
@@ -454,10 +454,10 @@ module onepack::onepack {
         stats.backpack_ipfs = ipfs_url;
     }
 
-    // ========== Функции игровых предметов ==========
+    // ========== Game Item Functions ==========
 
-    /// Создание нового предмета (только админ)
-    /// Предмет создается и передается владельцу напрямую
+    /// Create new item (admin only)
+    /// Item is created and transferred to owner directly
     public entry fun admin_mint_item(
         _state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -487,7 +487,7 @@ module onepack::onepack {
         };
 
         let item_id_obj = object::id(&item);
-        // Предмет передается владельцу, в Table добавляется только при выставлении на продажу
+        // Item is transferred to owner, added to Table only when listed for sale
         transfer::public_transfer(item, owner);
 
         event::emit(ItemMinted {
@@ -498,7 +498,7 @@ module onepack::onepack {
         });
     }
 
-    /// Редактирование предмета (только админ)
+    /// Edit item (admin only)
     public entry fun admin_edit_item(
         state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -519,7 +519,7 @@ module onepack::onepack {
         item.ipfs_metadata_url = new_ipfs_metadata_url;
     }
 
-    /// Удаление предмета (только админ)
+    /// Delete item (admin only)
     public entry fun admin_delete_item(
         state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -529,7 +529,7 @@ module onepack::onepack {
         assert!(admin_cap.admin == ctx.sender(), ENotAuthorized);
         assert!(table::contains(&state.items, item_id), EItemNotFound);
         
-        // Проверяем, не в продаже ли предмет
+        // Check if item is listed for sale
         if (table::contains(&state.listings, item_id)) {
             let listing = table::remove(&mut state.listings, item_id);
             let MarketplaceListing { id, item_id: _, price: _, seller: _, created_at: _ } = listing;
@@ -545,8 +545,8 @@ module onepack::onepack {
         });
     }
 
-    /// Добавление предмета игроку (только админ)
-    /// Если предмет в Table (на маркетплейсе), он будет удален и передан игроку
+    /// Add item to player (admin only)
+    /// If item is in Table (on marketplace), it will be removed and transferred to player
     public entry fun admin_add_item_to_player(
         state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -556,29 +556,29 @@ module onepack::onepack {
     ) {
         assert!(admin_cap.admin == ctx.sender(), ENotAuthorized);
         
-        // Если предмет в Table (на маркетплейсе), удаляем его
+        // If item is in Table (on marketplace), remove it
         if (table::contains(&state.items, item_id)) {
-            // Проверяем, не в продаже ли предмет
+            // Check if item is listed for sale
             if (table::contains(&state.listings, item_id)) {
                 let listing = table::remove(&mut state.listings, item_id);
                 let MarketplaceListing { id, item_id: _, price: _, seller: _, created_at: _ } = listing;
                 object::delete(id);
             };
 
-            // Удаляем предмет из Table и передаем игроку
+            // Remove item from Table and transfer to player
             let mut item = table::remove(&mut state.items, item_id);
             item.owner = player;
             item.is_listed = false;
             transfer::public_transfer(item, player);
         } else {
-            // Предмет не в Table, значит он у кого-то во владении
-            // В этом случае админ не может его передать без доступа к объекту
-            // Эта функция работает только для предметов в Table
+            // Item is not in Table, meaning it's owned by someone
+            // In this case admin cannot transfer it without access to the object
+            // This function only works for items in Table
             abort EItemNotFound
         };
     }
 
-    /// Удаление предмета у игрока (только админ)
+    /// Remove item from player (admin only)
     public entry fun admin_remove_item_from_player(
         state: &mut OnePackState,
         admin_cap: &AdminCap,
@@ -588,7 +588,7 @@ module onepack::onepack {
         assert!(admin_cap.admin == ctx.sender(), ENotAuthorized);
         assert!(table::contains(&state.items, item_id), EItemNotFound);
 
-        // Удаляем из листингов если есть
+        // Remove from listings if exists
         if (table::contains(&state.listings, item_id)) {
             let listing = table::remove(&mut state.listings, item_id);
             let MarketplaceListing { id, item_id: _, price: _, seller: _, created_at: _ } = listing;
@@ -604,10 +604,10 @@ module onepack::onepack {
         });
     }
 
-    // ========== Функции маркетплейса ==========
+    // ========== Marketplace Functions ==========
 
-    /// Выставление предмета на продажу
-    /// Предмет передается в контракт и добавляется в Table
+    /// List item for sale
+    /// Item is transferred to contract and added to Table
     public entry fun list_item(
         state: &mut OnePackState,
         item: GameItem,
@@ -624,7 +624,7 @@ module onepack::onepack {
         let mut item_mut = item;
         item_mut.is_listed = true;
 
-        // Добавляем предмет в Table
+        // Add item to Table
         table::add(&mut state.items, item_id, item_mut);
 
         let listing = MarketplaceListing {
@@ -632,7 +632,7 @@ module onepack::onepack {
             item_id,
             price,
             seller,
-            created_at: 0, // TODO: использовать clock::timestamp_ms() если нужен timestamp
+            created_at: 0, // TODO: use clock::timestamp_ms() if timestamp is needed
         };
 
         table::add(&mut state.listings, item_id, listing);
@@ -644,8 +644,8 @@ module onepack::onepack {
         });
     }
 
-    /// Отмена листинга
-    /// Предмет возвращается владельцу
+    /// Cancel listing
+    /// Item is returned to owner
     public entry fun cancel_listing(
         state: &mut OnePackState,
         item_id: ID,
@@ -654,25 +654,25 @@ module onepack::onepack {
         assert!(table::contains(&state.items, item_id), EItemNotFound);
         assert!(table::contains(&state.listings, item_id), EItemNotListed);
 
-        // Получаем информацию о предмете
+        // Get item information
         let item = table::borrow(&state.items, item_id);
         assert!(item.owner == ctx.sender(), ENotAuthorized);
         assert!(item.is_listed, EItemNotListed);
         
         let owner = item.owner;
         
-        // Удаляем листинг
+        // Remove listing
         let listing = table::remove(&mut state.listings, item_id);
         let MarketplaceListing { id, item_id: _, price: _, seller: _, created_at: _ } = listing;
         object::delete(id);
         
-        // Удаляем предмет из Table и возвращаем владельцу
+        // Remove item from Table and return to owner
         let mut item_obj = table::remove(&mut state.items, item_id);
         item_obj.is_listed = false;
         transfer::public_transfer(item_obj, owner);
     }
 
-    /// Покупка предмета на маркетплейсе
+    /// Buy item on marketplace
     public entry fun buy_item(
         state: &mut OnePackState,
         treasury_cap: &mut TreasuryCap<ONEPACK>,
@@ -689,25 +689,25 @@ module onepack::onepack {
         assert!(coin::value(&payment) >= price, EInsufficientFunds);
         assert!(ctx.sender() != seller, ENotAuthorized);
 
-        // Вычисляем комиссию (2.5%)
+        // Calculate fee (2.5%)
         let fee = (price * MARKETPLACE_FEE_BPS) / 10000;
         let seller_amount = price - fee;
 
-        // Переводим токены продавцу
+        // Transfer tokens to seller
         if (seller_amount > 0) {
             let seller_coin = coin::split(&mut payment, seller_amount, ctx);
             transfer::public_transfer(seller_coin, seller);
         };
 
-        // Сжигаем комиссию (остаток в payment должен быть равен fee)
+        // Burn fee (remaining payment should equal fee)
         coin::burn(treasury_cap, payment);
 
-        // Удаляем листинг
+        // Remove listing
         let listing = table::remove(&mut state.listings, item_id);
         let MarketplaceListing { id: listing_id, item_id: _, price: _, seller: _, created_at: _ } = listing;
         object::delete(listing_id);
         
-        // Удаляем предмет из Table и передаем покупателю
+        // Remove item from Table and transfer to buyer
         let mut item = table::remove(&mut state.items, item_id);
         item.owner = ctx.sender();
         item.is_listed = false;
@@ -722,24 +722,24 @@ module onepack::onepack {
         });
     }
 
-    // ========== Геттеры ==========
+    // ========== Getters ==========
 
-    /// Получение статистики игрока
+    /// Get player statistics
     public fun get_stats(stats: &PlayerStats): (u64, u64, u64, u64, u64, u64) {
         (stats.wins, stats.losses, stats.total_damage, stats.play_time_seconds, stats.level, stats.rating)
     }
 
-    /// Получение информации о предмете
+    /// Get item information
     public fun get_item_info(item: &GameItem): (u64, u8, u8, address, bool) {
         (item.item_id, item.item_type, item.rarity, item.owner, item.is_listed)
     }
 
-    /// Получение информации о листинге
+    /// Get listing information
     public fun get_listing_info(listing: &MarketplaceListing): (ID, u64, address, u64) {
         (listing.item_id, listing.price, listing.seller, listing.created_at)
     }
 
-    /// Получение балансов пула
+    /// Get pool balances
     public fun get_pool_balances(pool: &SwapPool): (u64, u64) {
         (balance::value(&pool.sui_balance), balance::value(&pool.onepack_balance))
     }

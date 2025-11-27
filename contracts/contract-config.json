@@ -7,6 +7,13 @@
 	"onePackStateId": "0x470b1d9058071d20fe7bca8ea0eccbedc34447c76d00ef814b18e723fd351cb5",
 	"upgradeCapId": "0x03556757ef9ad9b229f92be650ce6d795e5d7599c5a4193b6f58e2f2027794b7",
 	"coinMetadataId": "0x59db45ae4c88b0099be4b55e8e8212fc6775e7f9257119357c21b99b1e8ca61f",
+	"coinTypeTag": "0x1865f2d52964f2432815952e11f39eb03f4aee9b30c9b748beacabe7c38310cc::onepack::ONEPACK",
 	"transactionDigest": "J6K3yxC5ZYYFd9AG5zsJWDePGcZLdswXMFbrfi1DZCC2",
-	"deployedAt": "2024"
+	"deployedAt": "2024",
+	"tokenInfo": {
+		"name": "OnePack Game Token",
+		"symbol": "ONEPACK",
+		"decimals": 9,
+		"description": "Internal game token for OnePack game"
+	}
 }
