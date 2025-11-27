@@ -1,0 +1,15 @@
+# Move build artifacts
+build/
+*.mv
+*.abi
+
+# Sui specific
+.sui/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
