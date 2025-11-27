@@ -77,6 +77,32 @@ export default function Header() {
 					>
 						GAME
 					</Link>
+					<Link
+						href="/swap"
+						className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 transition-colors"
+					>
+						SWAP
+					</Link>
+					<Link
+						href="/swap/reverse"
+						className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 transition-colors"
+					>
+						REVERSE SWAP
+					</Link>
+					<Link
+						href="/marketplace"
+						className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 transition-colors"
+					>
+						MARKETPLACE
+					</Link>
+					{account && (
+						<Link
+							href={`/profile/${account.address}`}
+							className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-medium rounded border border-slate-700/50 transition-colors"
+						>
+							PROFILE
+						</Link>
+					)}
 				</nav>
 
 				<div className="flex items-center gap-3">
@@ -116,7 +142,7 @@ export default function Header() {
 										</div>
 									</div>
 
-									<div className="p-2">
+									<div className="p-2 space-y-1">
 										{account.chains && account.chains.length > 0 && (
 											<div className="px-3 py-2 text-xs text-slate-400">
 												Network:{' '}
@@ -125,6 +151,14 @@ export default function Header() {
 												</span>
 											</div>
 										)}
+										<Link
+											href={`/profile/${account.address}`}
+											onClick={() => setIsDropdownOpen(false)}
+											className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/50 rounded border border-slate-700/50 transition-colors"
+										>
+											<FaUser size={14} />
+											<span>VIEW PROFILE</span>
+										</Link>
 									</div>
 
 									<div className="p-2 border-t border-slate-800/50">
