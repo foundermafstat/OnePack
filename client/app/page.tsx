@@ -60,19 +60,22 @@ export default function Home() {
 				<div className="w-1/3 pl-8 pr-16">
 					{/* Logo/Title */}
 					<div className="mb-8">
-						<h1 className="text-5xl font-heading font-bold cyberpunk-text-glow text-cyan-400 mb-2 tracking-wider">
+						<h1
+							className="text-5xl font-heading font-black text-white mb-2 tracking-wider"
+							style={{ fontWeight: 900 }}
+						>
 							ONEPACK
 						</h1>
-						<div className="h-1 w-24 bg-cyan-400 cyberpunk-glow" />
+						<div className="h-1 w-24 bg-white cyberpunk-glow" />
 					</div>
 
 					{/* Typewriter Text */}
 					<div className="mb-8">
 						<div
 							ref={terminalRef}
-							className="bg-black/80 backdrop-blur-md rounded-lg p-8 shadow-2xl  border-cyan-500/50 max-h-[50vh] overflow-y-auto terminal-scrollbar"
+							className="bg-[#020305] backdrop-blur-md rounded-lg p-8 shadow-2xl  border-white/50 max-h-[50vh] overflow-y-auto terminal-scrollbar"
 						>
-							<div className="text-sm leading-relaxed font-body">
+							<div className="text-sm leading-relaxed font-body text-white">
 								{startTyping ? (
 									<TypewriterText
 										text={descriptionText}
@@ -88,7 +91,7 @@ export default function Home() {
 										}}
 									/>
 								) : (
-									<div className="text-cyan-400 font-mono animate-pulse">
+									<div className="text-white font-mono animate-pulse">
 										Initializing...
 									</div>
 								)}

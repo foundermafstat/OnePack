@@ -26,12 +26,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 	return (
 		<div className="z-10 w-full flex flex-col gap-2 pointer-events-auto bg-[#020305]">
 			<div className="flex justify-between items-center bg-slate-900/50 p-3 border-b border-slate-800/50">
-				<h1 className="text-xl font-bold text-slate-300 flex items-center gap-2">
-					BattlePack{' '}
-					<span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded">
-						BETA
-					</span>
-				</h1>
+				
 
 				{gameState === 'shop' && (
 					<button

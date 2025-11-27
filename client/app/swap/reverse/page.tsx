@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
-import { CONTRACT_CONFIG, formatTokenAmount, parseTokenAmount } from '@/lib/contract';
+import {
+	CONTRACT_CONFIG,
+	formatTokenAmount,
+	parseTokenAmount,
+	getExplorerUrl,
+} from '@/lib/contract';
 import { buildSwapOnepackToSuiTransaction } from '@/lib/contract-transactions';
 import { FaExchangeAlt, FaSpinner } from 'react-icons/fa';
 
@@ -17,6 +22,8 @@ export default function ReverseSwapPage() {
 	const [onepackCoins, setOnepackCoins] = useState<any[]>([]);
 	const [selectedCoinId, setSelectedCoinId] = useState<string>('');
 	const [error, setError] = useState<string | null>(null);
+	const [txDigest, setTxDigest] = useState<string | null>(null);
+	const [success, setSuccess] = useState(false);
 
 	// Fetch pool ID from state
 	const { data: stateData } = useSuiClientQuery('getObject', {
@@ -32,7 +39,8 @@ export default function ReverseSwapPage() {
 		{
 			owner: account?.address || '',
 			filter: {
-				StructType: '0x2::coin::Coin<0x1865f2d52964f2432815952e11f39eb03f4aee9b30c9b748beacabe7c38310cc::onepack::ONEPACK>',
+				StructType:
+					'0x2::coin::Coin<0x1865f2d52964f2432815952e11f39eb03f4aee9b30c9b748beacabe7c38310cc::onepack::ONEPACK>',
 			},
 			options: {
 				showContent: true,
@@ -103,11 +111,16 @@ export default function ReverseSwapPage() {
 		}
 
 		try {
-			const onepackIn = parseTokenAmount(onepackAmount, CONTRACT_CONFIG.DECIMALS);
+			const onepackIn = parseTokenAmount(
+				onepackAmount,
+				CONTRACT_CONFIG.DECIMALS
+			);
 			if (poolData.data.content && 'fields' in poolData.data.content) {
 				const fields = poolData.data.content.fields as any;
 				const suiBalance = BigInt(fields.sui_balance?.fields?.value || '0');
-				const onepackBalance = BigInt(fields.onepack_balance?.fields?.value || '0');
+				const onepackBalance = BigInt(
+					fields.onepack_balance?.fields?.value || '0'
+				);
 
 				if (suiBalance > 0 && onepackBalance > 0) {
 					const onepackAfter = onepackBalance + onepackIn;
@@ -121,22 +134,34 @@ export default function ReverseSwapPage() {
 	}, [onepackAmount, poolData, poolId]);
 
 	const selectedCoin = onepackCoins.find((c) => c.id === selectedCoinId);
-	const maxBalance = selectedCoin ? formatTokenAmount(selectedCoin.balance, CONTRACT_CONFIG.DECIMALS) : '0';
+	const maxBalance = selectedCoin
+		? formatTokenAmount(selectedCoin.balance, CONTRACT_CONFIG.DECIMALS)
+		: '0';
 
 	const handleSwap = () => {
-		if (!account || !poolId || !onepackAmount || !suiAmount || !selectedCoinId) {
+		if (
+			!account ||
+			!poolId ||
+			!onepackAmount ||
+			!suiAmount ||
+			!selectedCoinId
+		) {
 			setError('Please fill in all fields');
 			return;
 		}
 
-		if (selectedCoin && parseTokenAmount(onepackAmount, CONTRACT_CONFIG.DECIMALS) > selectedCoin.balance) {
+		if (
+			selectedCoin &&
+			parseTokenAmount(onepackAmount, CONTRACT_CONFIG.DECIMALS) >
+				selectedCoin.balance
+		) {
 			setError('Insufficient ONEPACK balance');
 			return;
 		}
 
 		setError(null);
 		const minSuiOut = parseTokenAmount(
-			(String(Number(suiAmount) * 0.95)), // 5% slippage tolerance
+			String(Number(suiAmount) * 0.95), // 5% slippage tolerance
 			9
 		);
 
@@ -152,12 +177,17 @@ export default function ReverseSwapPage() {
 				transaction: tx,
 			},
 			{
-				onSuccess: () => {
+				onSuccess: (result) => {
+					setSuccess(true);
+					setTxDigest(result.digest);
 					setOnepackAmount('');
 					setSuiAmount('');
 				},
 				onError: (err) => {
+					console.error('Transaction error:', err);
 					setError(err.message || 'Transaction failed');
+					setTxDigest(null);
+					setSuccess(false);
 				},
 			}
 		);
@@ -167,8 +197,12 @@ export default function ReverseSwapPage() {
 		return (
 			<div className="min-h-screen bg-[#020305] flex items-center justify-center p-4">
 				<div className="bg-slate-900/50 border border-slate-800/50 rounded-lg p-8 max-w-md w-full text-center">
-					<h2 className="text-2xl font-bold text-slate-300 mb-4">Connect Wallet</h2>
-					<p className="text-slate-400">Please connect your wallet to use the swap</p>
+					<h2 className="text-2xl font-bold text-slate-300 mb-4">
+						Connect Wallet
+					</h2>
+					<p className="text-slate-400">
+						Please connect your wallet to use the swap
+					</p>
 				</div>
 			</div>
 		);
@@ -183,31 +217,41 @@ export default function ReverseSwapPage() {
 						Swap ONEPACK to SUI
 					</h1>
 
-					{poolData && poolData.data?.content && 'fields' in poolData.data.content && (
-						<div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
-							<h3 className="text-sm font-semibold text-slate-400 mb-2">Pool Liquidity</h3>
-							<div className="grid grid-cols-2 gap-4">
-								<div>
-									<p className="text-xs text-slate-500">SUI Balance</p>
-									<p className="text-lg font-bold text-slate-300">
-										{formatTokenAmount(
-											BigInt((poolData.data.content.fields as any).sui_balance?.fields?.value || '0'),
-											9
-										)}
-									</p>
-								</div>
-								<div>
-									<p className="text-xs text-slate-500">ONEPACK Balance</p>
-									<p className="text-lg font-bold text-slate-300">
-										{formatTokenAmount(
-											BigInt((poolData.data.content.fields as any).onepack_balance?.fields?.value || '0'),
-											CONTRACT_CONFIG.DECIMALS
-										)}
-									</p>
+					{poolData &&
+						poolData.data?.content &&
+						'fields' in poolData.data.content && (
+							<div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+								<h3 className="text-sm font-semibold text-slate-400 mb-2">
+									Pool Liquidity
+								</h3>
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<p className="text-xs text-slate-500">SUI Balance</p>
+										<p className="text-lg font-bold text-slate-300">
+											{formatTokenAmount(
+												BigInt(
+													(poolData.data.content.fields as any).sui_balance
+														?.fields?.value || '0'
+												),
+												9
+											)}
+										</p>
+									</div>
+									<div>
+										<p className="text-xs text-slate-500">ONEPACK Balance</p>
+										<p className="text-lg font-bold text-slate-300">
+											{formatTokenAmount(
+												BigInt(
+													(poolData.data.content.fields as any).onepack_balance
+														?.fields?.value || '0'
+												),
+												CONTRACT_CONFIG.DECIMALS
+											)}
+										</p>
+									</div>
 								</div>
 							</div>
-						</div>
-					)}
+						)}
 
 					{onepackCoins.length > 0 && (
 						<div className="mb-4">
@@ -221,13 +265,19 @@ export default function ReverseSwapPage() {
 							>
 								{onepackCoins.map((coin) => (
 									<option key={coin.id} value={coin.id}>
-										{formatTokenAmount(coin.balance, CONTRACT_CONFIG.DECIMALS)} ONEPACK
+										{formatTokenAmount(coin.balance, CONTRACT_CONFIG.DECIMALS)}{' '}
+										ONEPACK
 									</option>
 								))}
 							</select>
 							{selectedCoin && (
 								<p className="text-xs text-slate-500 mt-1">
-									Available: {formatTokenAmount(selectedCoin.balance, CONTRACT_CONFIG.DECIMALS)} ONEPACK
+									Available:{' '}
+									{formatTokenAmount(
+										selectedCoin.balance,
+										CONTRACT_CONFIG.DECIMALS
+									)}{' '}
+									ONEPACK
 								</p>
 							)}
 						</div>
@@ -284,9 +334,45 @@ export default function ReverseSwapPage() {
 							</div>
 						)}
 
+						{success && txDigest && (
+							<div className="p-4 bg-green-900/20 border border-green-800/50 rounded-lg">
+								<p className="text-green-400 text-sm mb-2">
+									✅ Swap completed successfully!
+								</p>
+								<a
+									href={getExplorerUrl(txDigest)}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-blue-400 hover:text-blue-300 text-sm underline inline-flex items-center gap-1"
+								>
+									View transaction on explorer
+									<svg
+										className="w-4 h-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+										/>
+									</svg>
+								</a>
+							</div>
+						)}
+
 						<button
 							onClick={handleSwap}
-							disabled={isPending || !onepackAmount || !suiAmount || !poolId || !selectedCoinId || onepackCoins.length === 0}
+							disabled={
+								isPending ||
+								!onepackAmount ||
+								!suiAmount ||
+								!poolId ||
+								!selectedCoinId ||
+								onepackCoins.length === 0
+							}
 							className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
 						>
 							{isPending ? (
@@ -304,4 +390,3 @@ export default function ReverseSwapPage() {
 		</div>
 	);
 }
-

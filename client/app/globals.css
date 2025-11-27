@@ -103,6 +103,14 @@ h3 {
 	font-weight: 300;
 }
 
+.font-bebas-nav,
+.font-bebas-nav span,
+.font-bebas-nav a,
+.font-bebas-nav button {
+	font-family: var(--font-bebas), sans-serif !important;
+	font-weight: 500 !important;
+}
+
 /* Применение тонкого начертания для всего контента по умолчанию */
 p,
 span,
@@ -128,14 +136,14 @@ label {
 }
 
 .terminal-scrollbar::-webkit-scrollbar-thumb {
-	background: rgba(6, 182, 212, 0.5);
+	background: rgba(255, 255, 255, 0.5);
 	border-radius: 4px;
-	box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+	box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .terminal-scrollbar::-webkit-scrollbar-thumb:hover {
-	background: rgba(6, 182, 212, 0.7);
-	box-shadow: 0 0 12px rgba(6, 182, 212, 0.8);
+	background: rgba(255, 255, 255, 0.7);
+	box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
 }
 
 /* Cyberpunk styles */

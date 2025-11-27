@@ -9,22 +9,21 @@ export function buildSwapSuiToOnepackTransaction(
 	minOnepackOut: string
 ): Transaction {
 	const tx = new Transaction();
-	
+
 	const suiAmountBigInt = parseTokenAmount(suiAmount, 9); // SUI has 9 decimals
-	const minOnepackOutBigInt = parseTokenAmount(minOnepackOut, CONTRACT_CONFIG.DECIMALS);
-	
+	const minOnepackOutBigInt = parseTokenAmount(
+		minOnepackOut,
+		CONTRACT_CONFIG.DECIMALS
+	);
+
 	// Split SUI from gas
 	const [suiCoin] = tx.splitCoins(tx.gas, [suiAmountBigInt]);
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.SWAP_SUI_TO_ONEPACK}`,
-		arguments: [
-			tx.object(poolId),
-			suiCoin,
-			tx.pure.u64(minOnepackOutBigInt),
-		],
+		arguments: [tx.object(poolId), suiCoin, tx.pure.u64(minOnepackOutBigInt)],
 	});
-	
+
 	return tx;
 }
 
@@ -35,14 +34,17 @@ export function buildSwapOnepackToSuiTransaction(
 	minSuiOut: string
 ): Transaction {
 	const tx = new Transaction();
-	
-	const onepackAmountBigInt = parseTokenAmount(onepackAmount, CONTRACT_CONFIG.DECIMALS);
+
+	const onepackAmountBigInt = parseTokenAmount(
+		onepackAmount,
+		CONTRACT_CONFIG.DECIMALS
+	);
 	const minSuiOutBigInt = parseTokenAmount(minSuiOut, 9); // SUI has 9 decimals
-	
+
 	// Split the required amount from the coin
 	const onepackCoin = tx.object(onepackCoinId);
 	const [onepackCoinSplit] = tx.splitCoins(onepackCoin, [onepackAmountBigInt]);
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.SWAP_ONEPACK_TO_SUI}`,
 		arguments: [
@@ -51,7 +53,7 @@ export function buildSwapOnepackToSuiTransaction(
 			tx.pure.u64(minSuiOutBigInt),
 		],
 	});
-	
+
 	return tx;
 }
 
@@ -61,9 +63,9 @@ export function buildListItemTransaction(
 	price: string
 ): Transaction {
 	const tx = new Transaction();
-	
+
 	const priceBigInt = parseTokenAmount(price, CONTRACT_CONFIG.DECIMALS);
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.LIST_ITEM}`,
 		arguments: [
@@ -72,7 +74,7 @@ export function buildListItemTransaction(
 			tx.pure.u64(priceBigInt),
 		],
 	});
-	
+
 	return tx;
 }
 
@@ -81,12 +83,12 @@ export function buildCancelListingTransaction(
 	itemId: string
 ): Transaction {
 	const tx = new Transaction();
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.CANCEL_LISTING}`,
 		arguments: [tx.object(stateId), tx.pure.id(itemId)],
 	});
-	
+
 	return tx;
 }
 
@@ -98,13 +100,13 @@ export function buildBuyItemTransaction(
 	price: string
 ): Transaction {
 	const tx = new Transaction();
-	
+
 	const priceBigInt = parseTokenAmount(price, CONTRACT_CONFIG.DECIMALS);
-	
+
 	// Split the required amount from the coin
 	const onepackCoin = tx.object(onepackCoinId);
 	const [onepackCoinSplit] = tx.splitCoins(onepackCoin, [priceBigInt]);
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.BUY_ITEM}`,
 		arguments: [
@@ -114,17 +116,56 @@ export function buildBuyItemTransaction(
 			onepackCoinSplit,
 		],
 	});
-	
+
 	return tx;
 }
 
-export function buildCreatePlayerStatsTransaction(stateId: string): Transaction {
+export function buildCreatePlayerStatsTransaction(
+	stateId: string
+): Transaction {
 	const tx = new Transaction();
-	
+
 	tx.moveCall({
 		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.CREATE_PLAYER_STATS}`,
 		arguments: [tx.object(stateId)],
 	});
-	
+
+	return tx;
+}
+
+export function buildInitSwapPoolTransaction(
+	stateId: string,
+	adminCapId: string,
+	treasuryCapId: string,
+	initialOctAmount: string,
+	initialOnepackAmount: string,
+	sender?: string
+): Transaction {
+	const tx = new Transaction();
+
+	const initialOctBigInt = parseTokenAmount(initialOctAmount, 9); // OCT has 9 decimals
+	const initialOnepackBigInt = parseTokenAmount(
+		initialOnepackAmount,
+		CONTRACT_CONFIG.DECIMALS
+	);
+
+	// Set gas budget (100M MIST = 0.1 OCT)
+	// Add extra budget for pool initialization
+	tx.setGasBudget(200_000_000);
+
+	// Split OCT from gas
+	const [octCoin] = tx.splitCoins(tx.gas, [initialOctBigInt]);
+
+	tx.moveCall({
+		target: `${CONTRACT_CONFIG.PACKAGE_ID}::${CONTRACT_CONFIG.MODULE_NAME}::${CONTRACT_FUNCTIONS.INIT_SWAP_POOL}`,
+		arguments: [
+			tx.object(stateId),
+			tx.object(adminCapId),
+			tx.object(treasuryCapId),
+			octCoin,
+			tx.pure.u64(initialOnepackBigInt),
+		],
+	});
+
 	return tx;
 }

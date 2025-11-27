@@ -38,11 +38,11 @@ export function TypewriterText({
 
 	return (
 		<div className={className}>
-			<span className="font-mono text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+			<span className="font-mono text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
 				{displayedText}
 			</span>
 			{!isComplete && (
-				<span className="inline-block w-0.5 h-4 bg-cyan-400 ml-1 animate-pulse drop-shadow-[0_0_4px_rgba(6,182,212,0.9)]">
+				<span className="inline-block w-0.5 h-4 bg-white ml-1 animate-pulse drop-shadow-[0_0_4px_rgba(255,255,255,0.9)]">
 					|
 				</span>
 			)}
