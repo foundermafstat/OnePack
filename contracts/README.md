@@ -52,13 +52,22 @@ sui move test
 
 2. **Get testnet SUI tokens:**
    - Visit [Sui Testnet Faucet](https://discord.com/channels/916379725201563759/971488439931392130)
-   - Or use: `sui client faucet`
+   - Or use: `sui client faucet <YOUR_ADDRESS>`
 
 3. **Build and publish:**
    ```bash
    sui move build
    sui client publish --gas-budget 100000000
    ```
+
+## Deployment to OneChain Testnet
+
+If you're deploying to OneChain testnet specifically, you may need to adjust the RPC endpoint:
+
+```bash
+sui client new-env --alias onechain-testnet --rpc <ONECHAIN_TESTNET_RPC_URL>
+sui client switch --env onechain-testnet
+```
 
 ## Configuration
 
